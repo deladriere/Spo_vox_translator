@@ -6,6 +6,8 @@
 
 Run it here: https://deladriere.github.io/Spo_vox_translator/
 
+Source code: https://github.com/deladriere/Spo_vox_translator
+
 ## What It Does
 
 - Converts typed text to an approximate IPA transcription.
