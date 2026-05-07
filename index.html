@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SP0256 Translator</title>
+    <title>SPOvox translator</title>
     <script src="https://cdn.jsdelivr.net/npm/nexusui@2.1.0/dist/NexusUI.js"></script>
     <style>
         body {
@@ -550,18 +550,18 @@
                             <img src="chip.png" alt="Chip" style="width: 100%; height: auto;">
                         </td>
                         <td style="vertical-align: middle;">
-                            <h1 style="margin: 0;">SP0256 Translator</h1>
+                            <h1 style="margin: 0;">SPOvox translator</h1>
                         </td>
                     </tr>
                 </table>
-                <p class="app-version">Version 1.0</p>
+                <p class="app-version">Version 1.0.1</p>
             </div>
 
             <div class="resource-actions">
                 <button type="button" id="howItWorksBtn" class="resource-btn" aria-expanded="false" aria-controls="howItWorksPanel">
                     How it works
                 </button>
-                <a class="resource-btn source-code-btn" href="#" aria-label="Source code link placeholder">
+                <a class="resource-btn source-code-btn" href="https://deladriere.github.io/Spo_vox_translator/" aria-label="Open SPOvox translator page">
                     Source code
                 </a>
             </div>
@@ -570,7 +570,7 @@
                 <div class="info-body">
                     <ul>
                         <li>Type English text; it is converted to approximate IPA, then mapped to <strong>SP0256-AL2</strong>
-                            allophone labels from the firmware. MIDI <strong>Note On</strong> uses
+                            allophone labels for the <strong>SPOvox firmware</strong> running on <strong>Kraftor</strong>. MIDI <strong>Note On</strong> uses
                             <strong>note = 36 + index</strong> into that table (channel matches your device; default Web MIDI channel 1).</li>
                         <li>Consonants are blue badges; vowels and vowel-like allophones are red dropdowns so you can swap sounds quickly.</li>
                         <li>The <strong>Phoneme Controls</strong> panel sets per-token <strong>note duration</strong> (in ms),
@@ -579,7 +579,7 @@
                         <li><strong>Connect MIDI Device</strong> then <strong>Send MIDI Notes</strong> plays the
                             sequence over Web MIDI (Chrome/Edge). With the text field <em>not</em> focused, <kbd>Space</kbd>
                             sends the sequence.</li>
-                        <li><strong>Download MIDI</strong> saves <code>Spo256.mid</code> for your DAW—no MIDI hardware
+                        <li><strong>Download MIDI</strong> saves <code>SPOvox.mid</code> for your DAW—no MIDI hardware
                             required. Export keeps the same Note On timing as live send and avoids trailing stop events.</li>
                     </ul>
                 </div>
@@ -609,7 +609,7 @@
 
             <div class="midi-section">
                 <h3>🎵 MIDI Controls</h3>
-                <p>Send MIDI notes to your SP0256 bridge (e.g. <code>Emy.ino</code>), or download a <code>.mid</code> file for your DAW.</p>
+                <p>Send MIDI notes to SPOvox hardware or Kraftor running the SPOvox firmware, or download a <code>.mid</code> file for your DAW.</p>
 
                 <div id="midiConnectionStatus" class="status" style="display: none; margin-bottom: 15px;"></div>
 
@@ -645,7 +645,7 @@
     <div id="midiDialog" class="midi-dialog">
         <div class="midi-dialog-content">
             <h3>🎹 Select MIDI Device</h3>
-            <p>Choose a MIDI output device to connect to your SP0256 interface:</p>
+            <p>Choose a MIDI output device to connect to your SPOvox hardware or Kraftor running the SPOvox firmware:</p>
 
             <div id="deviceList" class="device-list">
                 <div class="device-item">Loading MIDI devices...</div>
@@ -659,7 +659,7 @@
     </div>
 
     <script>
-        // SP0256-AL2 allophone labels and MIDI routing (Emy.ino).
+        // SP0256-AL2 allophone labels and MIDI routing for the SPOvox firmware.
         // handleNoteOn: index = note - 36; SPO.writeGPIO(index) with al_label[index].
         const MIDI_PHONEME_CHANNEL = 0;
         const MIDI_NOTE_OFFSET = 36;
@@ -1487,7 +1487,7 @@
                 trackEvents.push(statusByte(0xE0, midiEvent.channel), bendLsb, bendMsb); // Pitch bend before phoneme
                 trackEvents.push(0x00);
                 trackEvents.push(statusByte(0x90, midiEvent.channel), midiEvent.note, velocity);
-                // The SP0256 bridge only needs Note On triggers. Omitting Note Off avoids
+                // SPOvox firmware only needs Note On triggers. Omitting Note Off avoids
                 // trailing PA1 on firmware that maps Note Off to phoneme 0.
                 deltaBeforePhoneme = Math.max(0, delayTicks);
             });
@@ -1510,7 +1510,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'Spo256.mid';
+            a.download = 'SPOvox.mid';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
