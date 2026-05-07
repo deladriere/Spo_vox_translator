@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SP0256 Translator</title>
+    <script src="https://cdn.jsdelivr.net/npm/nexusui@2.1.0/dist/NexusUI.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            flex: 1;
+        }
+
+        .phoneme-controls {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 820px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .title-block {
+            margin-bottom: 30px;
+        }
+
+        .title-block h1 {
+            text-align: center;
+            color: #333;
+            margin: 0 0 6px;
+        }
+
+        .app-version {
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            margin: 0;
+            letter-spacing: 0.02em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 18px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .output-section {
+            margin-top: 20px;
+        }
+
+        .output-box {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 10px;
+            min-height: 80px;
+        }
+
+        .ipa-text {
+            font-family: 'Times New Roman', serif;
+            font-size: 28px;
+            line-height: 1.6;
+            color: #333;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sp0256-phonemes-text {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            line-height: 1.8;
+            color: #2c3e50;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .phoneme {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 8px 12px;
+            margin: 4px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 20px;
+            height: 36px;
+            line-height: 20px;
+            box-sizing: border-box;
+            vertical-align: top;
+        }
+
+        .phoneme-dropdown {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 8px 12px;
+            margin: 4px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 20px;
+            border: none;
+            cursor: pointer;
+            min-width: 60px;
+            height: 36px;
+            line-height: 20px;
+            box-sizing: border-box;
+            vertical-align: top;
+        }
+
+        .phoneme-dropdown option {
+            background: white;
+            color: #333;
+            padding: 4px;
+        }
+
+        .phoneme-dropdown:focus {
+            outline: 2px solid #f39c12;
+            outline-offset: 2px;
+        }
+
+        .resource-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .resource-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            min-height: 44px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 1.2;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-sizing: border-box;
+        }
+
+        .resource-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .source-code-btn {
+            background: linear-gradient(135deg, #2c3e50 0%, #1f2d3a 100%);
+        }
+
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #0c5460;
+        }
+
+        .info[hidden] {
+            display: none;
+        }
+
+        .info-body {
+            margin: 0;
+        }
+
+        .info-body ul {
+            margin: 0;
+            padding-left: 1.35em;
+            line-height: 1.5;
+        }
+
+        .info-body li {
+            margin-bottom: 0.4em;
+        }
+
+        .info-body li:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-body kbd {
+            font-family: inherit;
+            font-size: 0.95em;
+            padding: 0.1em 0.45em;
+            border-radius: 4px;
+            border: 1px solid rgba(12, 84, 96, 0.35);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .sj-cmd {
+            margin: 0.85em 0;
+            padding: 0.65em 0 0.65em 0.85em;
+            border-left: 3px solid #667eea;
+            line-height: 1.45;
+        }
+
+        .sj-cmd .sj-cmd-title {
+            font-weight: bold;
+            color: #0c5460;
+            margin-bottom: 0.35em;
+        }
+
+        .sj-cmd p {
+            margin: 0;
+            font-size: 0.95em;
+        }
+
+        .sj-cmd .sj-midi {
+            font-size: 0.88em;
+            opacity: 0.9;
+            margin-top: 0.35em;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-style: italic;
+        }
+
+        .midi-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .midi-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            flex: 1;
+        }
+
+        .midi-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .midi-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .midi-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .midi-dialog-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .midi-dialog h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .device-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .device-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .device-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .device-item:last-child {
+            border-bottom: none;
+        }
+
+        .device-item.selected {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .dialog-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .dialog-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .dialog-btn.primary {
+            background: #2196f3;
+            color: white;
+        }
+
+        .dialog-btn.secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .phoneme-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            table-layout: fixed;
+        }
+
+        .phoneme-table th {
+            background: #f8f9fa;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            border: 1px solid #dee2e6;
+        }
+
+        .phoneme-table th:nth-child(1) {
+            width: 14%;
+        }
+
+        .phoneme-table th:nth-child(2) {
+            width: 30%;
+        }
+
+        .phoneme-table th:nth-child(3) {
+            width: 20%;
+        }
+
+        .phoneme-table th:nth-child(4) {
+            width: 36%;
+        }
+
+        .phoneme-table td {
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+
+        .phoneme-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .phoneme-table tr:nth-child(odd) {
+            background: white;
+        }
+
+        .phoneme-label {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: #3498db;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            min-width: 50px;
+        }
+
+        .phoneme-label.vowel {
+            background: #e74c3c;
+        }
+
+        .phoneme-slider-container {
+            width: 100%;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+
+        .slider-tooltip {
+            position: fixed;
+            z-index: 10000;
+            display: none;
+            max-width: 260px;
+            padding: 6px 9px;
+            border-radius: 6px;
+            background: rgba(20, 28, 34, 0.95);
+            color: #fff;
+            font-size: 13px;
+            font-weight: bold;
+            line-height: 1.25;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .phoneme-display {
+            font-size: 14px;
+            color: #666;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .phoneme-controls h3 {
+            margin-top: 0;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .phoneme-controls p {
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .reset-button {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-left: 10px;
+        }
+
+        .reset-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .description-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <div class="container">
+            <div class="title-block">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="vertical-align: middle; padding-right: 20px; width: 80px;">
+                            <img src="chip.png" alt="Chip" style="width: 100%; height: auto;">
+                        </td>
+                        <td style="vertical-align: middle;">
+                            <h1 style="margin: 0;">SP0256 Translator</h1>
+                        </td>
+                    </tr>
+                </table>
+                <p class="app-version">Version 1.0</p>
+            </div>
+
+            <div class="resource-actions">
+                <button type="button" id="howItWorksBtn" class="resource-btn" aria-expanded="false" aria-controls="howItWorksPanel">
+                    How it works
+                </button>
+                <a class="resource-btn source-code-btn" href="#" aria-label="Source code link placeholder">
+                    Source code
+                </a>
+            </div>
+
+            <div id="howItWorksPanel" class="info" hidden>
+                <div class="info-body">
+                    <ul>
+                        <li>Type English text; it is converted to approximate IPA, then mapped to <strong>SP0256-AL2</strong>
+                            allophone labels from the firmware. MIDI <strong>Note On</strong> uses
+                            <strong>note = 36 + index</strong> into that table (channel matches your device; default Web MIDI channel 1).</li>
+                        <li>Consonants are blue badges; vowels and vowel-like allophones are red dropdowns so you can swap sounds quickly.</li>
+                        <li>The <strong>Phoneme Controls</strong> panel sets per-token <strong>note duration</strong> (in ms),
+                            <strong>velocity</strong>, and <strong>PitchBend (Pitch)</strong>: the slider shows the LTC6903 master clock control value <strong>0–1023</strong> used by the firmware; MIDI sends it as <strong>pitch bend</strong>.
+                        </li>
+                        <li><strong>Connect MIDI Device</strong> then <strong>Send MIDI Notes</strong> plays the
+                            sequence over Web MIDI (Chrome/Edge). With the text field <em>not</em> focused, <kbd>Space</kbd>
+                            sends the sequence.</li>
+                        <li><strong>Download MIDI</strong> saves <code>Spo256.mid</code> for your DAW—no MIDI hardware
+                            required. Export keeps the same Note On timing as live send and avoids trailing stop events.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="textInput">Enter text to convert:</label>
+                <input type="text" id="textInput" placeholder="Type your text here..." value="hello">
+            </div>
+
+            <div class="output-section">
+                <div class="output-box">
+                    <div><strong>IPA Phonemes:</strong></div>
+                    <div id="ipaOutput" class="ipa-text">həˈloʊ</div>
+                </div>
+
+                <div class="output-box">
+                    <div><strong>SP0256 allophones:</strong></div>
+                    <div id="sp0256PhonemesOutput" class="sp0256-phonemes-text">
+                        <span class="phoneme">HH1</span>
+                        <span class="phoneme">AX</span>
+                        <span class="phoneme">LL</span>
+                        <span class="phoneme">OW</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="midi-section">
+                <h3>🎵 MIDI Controls</h3>
+                <p>Send MIDI notes to your SP0256 bridge (e.g. <code>Emy.ino</code>), or download a <code>.mid</code> file for your DAW.</p>
+
+                <div id="midiConnectionStatus" class="status" style="display: none; margin-bottom: 15px;"></div>
+
+                <div class="button-group">
+                    <button id="connectMidiBtn" class="midi-btn" onclick="showMIDIDialog()">
+                        🔌 Connect MIDI Device
+                    </button>
+                    <button id="sendMidiBtn" class="midi-btn" onclick="sendMIDINotes()" disabled>
+                        🎹 Send MIDI Notes
+                    </button>
+                    <button type="button" id="downloadMidiBtn" class="midi-btn download-btn" onclick="downloadMIDI()">
+                        💾 Download MIDI
+                    </button>
+                </div>
+
+                <div id="midiStatus" class="status" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="phoneme-controls">
+            <h3>🎛️ Phoneme Controls</h3>
+            <div class="description-row">
+                <p>Adjust controls, then press <strong>Send MIDI Notes</strong> (or press <kbd>Space</kbd>)</p>
+                <button class="reset-button" onclick="resetAllSliders()">🔄 Reset All</button>
+            </div>
+            <div id="phonemeControlsList">
+                <!-- Phoneme controls will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MIDI Device Selection Dialog -->
+    <div id="midiDialog" class="midi-dialog">
+        <div class="midi-dialog-content">
+            <h3>🎹 Select MIDI Device</h3>
+            <p>Choose a MIDI output device to connect to your SP0256 interface:</p>
+
+            <div id="deviceList" class="device-list">
+                <div class="device-item">Loading MIDI devices...</div>
+            </div>
+
+            <div class="dialog-buttons">
+                <button class="dialog-btn secondary" onclick="closeMIDIDialog()">Cancel</button>
+                <button id="connectBtn" class="dialog-btn primary" onclick="connectToDevice()" disabled>Connect</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // SP0256-AL2 allophone labels and MIDI routing (Emy.ino).
+        // handleNoteOn: index = note - 36; SPO.writeGPIO(index) with al_label[index].
+        const MIDI_PHONEME_CHANNEL = 0;
+        const MIDI_NOTE_OFFSET = 36;
+
+        const SP0256_AL_LABELS = [
+            'PA1', 'PA2', 'PA3', 'PA4', 'PA5', 'OY', 'AY', 'EH',
+            'KK3', 'PP', 'JH', 'NN1', 'IH', 'TT2', 'RR1', 'AX', 'MM',
+            'TT1', 'DH1', 'IY', 'EY', 'DD1', 'UW1', 'AO', 'AA', 'YY2',
+            'AE', 'HH1', 'BB1', 'TH', 'UH', 'UW2', 'AW', 'DD2', 'GG3',
+            'VV', 'GG1', 'SH', 'ZH', 'RR2', 'FF', 'KK2', 'KK1', 'ZZ',
+            'NG', 'LL', 'WW', 'XR', 'WH', 'YY1', 'CH', 'ER1', 'ER2',
+            'OW', 'DH2', 'SS', 'NN2', 'HH2', 'OR', 'AR', 'YR', 'GG2',
+            'EL', 'BB2'
+        ];
+
+        const phonemeToMIDI = {};
+        SP0256_AL_LABELS.forEach((label, index) => {
+            phonemeToMIDI[label] = index;
+        });
+
+        function statusByte(command, channel0to15) {
+            return command | Math.max(0, Math.min(15, channel0to15));
+        }
+
+        function getSp0256MIDIEvent(label) {
+            const offset = phonemeToMIDI[label];
+            if (offset === undefined) {
+                return null;
+            }
+            return {
+                channel: MIDI_PHONEME_CHANNEL,
+                note: MIDI_NOTE_OFFSET + offset
+            };
+        }
+
+        // IPA → SP0256-AL2 allophone names (no positional KK/GG/BB/DD/TT/NN/HH variants — defaults only).
+        const ipaToSp0256 = {
+            // --- Digraphs / sequences (longer keys matched first in converter) ---
+            'tʃ': 'CH',
+            'dʒ': 'JH',
+            'oʊ': 'OW',
+            'eɪ': 'EY',
+            'aɪ': 'AY',
+            'aʊ': 'AW',
+            'ɔɪ': 'OY',
+            'ju': ['YY1', 'UW1'],
+            'ər': 'ER1',
+            'ɜr': 'ER2',
+            'ɪr': 'YR',
+            'ɛr': 'ER2',
+            'ɑr': 'AR',
+            'ɔr': 'OR',
+            'ɚ': 'ER1',
+            'ɝ': 'ER2',
+            'l̩': 'EL',
+            'm̩': 'MM',
+            'n̩': 'NN1',
+            // --- Stops (defaults) ---
+            'p': 'PP',
+            'b': 'BB2',
+            't': 'TT2',
+            'd': 'DD2',
+            'ʈ': 'TT2',
+            'ɖ': 'DD2',
+            'c': 'KK1',
+            'ɟ': 'JH',
+            'k': 'KK1',
+            'g': 'GG1',
+            'ɡ': 'GG1',
+            'q': 'KK1',
+            'ɢ': 'GG1',
+            'ʔ': '',
+            'ɓ': 'BB2',
+            'ɗ': 'DD2',
+            'ɠ': 'GG1',
+            'ʛ': 'GG1',
+            'ʄ': 'JH',
+            'ʼ': '',
+            // --- Nasals ---
+            'm': 'MM',
+            'ɱ': 'MM',
+            'n̪': 'NN1',
+            'n': 'NN1',
+            'ɳ': 'NN1',
+            'ɲ': 'NN1',
+            'ŋ': 'NG',
+            'ɴ': 'NG',
+            // --- Fricatives ---
+            'ɸ': 'FF',
+            'β': 'VV',
+            'f': 'FF',
+            'v': 'VV',
+            'θ': 'TH',
+            'ð': 'DH1',
+            's': 'SS',
+            'z': 'ZZ',
+            'ʃ': 'SH',
+            'ʒ': 'ZH',
+            'ʂ': 'SH',
+            'ʐ': 'ZH',
+            'ç': 'HH1',
+            'x': 'HH2',
+            'χ': 'HH2',
+            'ħ': 'HH2',
+            'h': 'HH1',
+            'ɦ': 'HH1',
+            'ɣ': 'GG1',
+            'ʁ': 'RR2',
+            'ʕ': 'AX',
+            'ʝ': 'IH',
+            // --- Affricates ---
+            'ʦ': ['TT1', 'SS'],
+            // --- Liquids / glides ---
+            'ʙ': 'RR2',
+            'r̥': 'RR2',
+            'r': 'RR2',
+            'ⱱ': 'RR2',
+            'ɾ': 'RR2',
+            'ɽ': 'RR2',
+            'ɬ': 'LL',
+            'ɮ': 'LL',
+            'l̪': 'LL',
+            'l': 'LL',
+            'ɭ': 'LL',
+            'ʎ': 'LL',
+            'ʟ': 'LL',
+            'ʋ': 'WW',
+            'ɹ': 'RR2',
+            'ɻ': 'RR2',
+            'j': 'YY1',
+            'ɰ': 'WW',
+            'w': 'WW',
+            // --- Clicks (unmapped) ---
+            'ʘ': '',
+            'ǀ': '',
+            'ǃ': '',
+            'ǂ': '',
+            'ǁ': '',
+            // --- Vowels (AL2-style) ---
+            'i': 'IY',
+            'y': 'IH',
+            'ɨ': 'IH',
+            'ʉ': 'UW2',
+            'ɯ': 'UW2',
+            'u': 'UW2',
+            'ɪ': 'IH',
+            'ʏ': 'IH',
+            'ʊ': 'UH',
+            'e': 'EH',
+            'ø': 'EH',
+            'ɘ': 'AX',
+            'ɵ': 'AX',
+            'ɤ': 'OW',
+            'o': 'OW',
+            'ə': 'AX',
+            'ɛ': 'EH',
+            'œ': 'EH',
+            'ɜ': 'ER2',
+            'ɞ': 'ER2',
+            'ʌ': 'AX',
+            'ɔ': 'AO',
+            'æ': 'AE',
+            'ɐ': 'AX',
+            'a': 'AE',
+            'ɶ': 'AE',
+            'ɑ': 'AA',
+            'ɒ': 'AO'
+        };
+
+        function hasSp0256Mapping(symbol) {
+            return Object.prototype.hasOwnProperty.call(ipaToSp0256, symbol);
+        }
+
+        // Simple text to IPA approximation (for demonstration)
+        function textToIPA(text) {
+            const textToIPAMap = {
+                'hello': 'həˈloʊ',
+                'world': 'wɜrld',
+                'test': 'tɛst',
+                'good': 'ɡʊd',
+                'morning': 'ˈmɔrnɪŋ',
+                'night': 'naɪt',
+                'day': 'deɪ',
+                'time': 'taɪm',
+                'how': 'haʊ',
+                'are': 'ɑr',
+                'you': 'ju',
+                'today': 'təˈdeɪ',
+                'fine': 'faɪn',
+                'thanks': 'θæŋks',
+                'please': 'pliz',
+                'yes': 'jɛs',
+                'no': 'noʊ',
+                'help': 'hɛlp',
+                'water': 'ˈwɔtər',
+                'food': 'fud',
+                'house': 'haʊs',
+                'car': 'kɑr',
+                'book': 'bʊk',
+                'cat': 'kæt',
+                'dog': 'dɔɡ',
+                'welcome': 'ˈwɛlkom',
+                'to': 'tɯ',
+                'the': 'ðə',
+                'machine': 'məˈʃin',
+                'robot': 'ˈroʊbət'
+            };
+
+            const lowerText = text.toLowerCase();
+
+            // Check for exact word matches first
+            if (textToIPAMap[lowerText]) {
+                return textToIPAMap[lowerText];
+            }
+
+            // For multi-word phrases, split and process each word
+            const words = lowerText.split(/\s+/);
+            if (words.length > 1) {
+                return words.map(word => textToIPAMap[word] || textToIPASimple(word)).join(' ');
+            }
+
+            // Simple letter-to-IPA approximation for single words
+            return textToIPASimple(lowerText);
+        }
+
+        function textToIPASimple(text) {
+            let ipa = text;
+
+            // Common letter combinations
+            ipa = ipa.replace(/th/g, 'θ');
+            ipa = ipa.replace(/sh/g, 'ʃ');
+            ipa = ipa.replace(/ch/g, 'tʃ');
+            ipa = ipa.replace(/ng/g, 'ŋ');
+            ipa = ipa.replace(/oo/g, 'u');
+            ipa = ipa.replace(/ee/g, 'i');
+            ipa = ipa.replace(/ay/g, 'eɪ');
+            ipa = ipa.replace(/oy/g, 'ɔɪ');
+            ipa = ipa.replace(/ow/g, 'aʊ');
+
+            // More accurate single letter mappings
+            // For unstressed syllables, use schwa (ə) instead of specific vowels
+            ipa = ipa.replace(/c/g, 'k');  // Add 'c' to 'k' mapping
+            ipa = ipa.replace(/a/g, 'æ');
+            ipa = ipa.replace(/e/g, 'ɛ');
+            ipa = ipa.replace(/i/g, 'ɪ');
+            // Only use ɔ for stressed 'o' sounds, use ə for unstressed
+            ipa = ipa.replace(/o/g, 'ə');  // Changed from 'ɔ' to 'ə' for better accuracy
+            ipa = ipa.replace(/u/g, 'ʊ');
+
+            return ipa;
+        }
+
+        // MIDI functions
+        let currentPhonemes = [];
+        let midiAccess = null;
+        let selectedOutput = null;
+        let availableOutputs = [];
+        let phonemeSliders = [];
+        let phonemeDurations = []; // Note duration in ms
+        let phonemeVelocities = []; // Array by position instead of object by phoneme
+        let phonemePitches = []; // LTC6903 master clock control 0–1023 per position → pitch bend on send
+        let isSendingMidi = false;
+        const midiSendTimeouts = new Set();
+
+        function scheduleMidiSend(callback, delayMs) {
+            const timeoutId = setTimeout(() => {
+                midiSendTimeouts.delete(timeoutId);
+                callback();
+            }, delayMs);
+            midiSendTimeouts.add(timeoutId);
+            return timeoutId;
+        }
+
+        function clearMidiSendTimeouts() {
+            midiSendTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
+            midiSendTimeouts.clear();
+        }
+
+        // SP0256 vowel-like allophones (short/long, r-colored, syllabic /l/) — red dropdowns
+        const vowelPhonemes = [
+            'IH', 'EH', 'AE', 'UH', 'AO', 'AX', 'AA',
+            'IY', 'EY', 'AY', 'OY', 'UW1', 'UW2', 'OW', 'AW', 'EL',
+            'ER1', 'ER2', 'OR', 'AR', 'YR', 'XR',
+            'YY1', 'YY2'
+        ];
+
+        const vowelOptions = [
+            { value: 'IH', label: 'IH' },
+            { value: 'EH', label: 'EH' },
+            { value: 'AE', label: 'AE' },
+            { value: 'UH', label: 'UH' },
+            { value: 'AO', label: 'AO' },
+            { value: 'AX', label: 'AX' },
+            { value: 'AA', label: 'AA' },
+            { value: 'IY', label: 'IY' },
+            { value: 'EY', label: 'EY' },
+            { value: 'AY', label: 'AY' },
+            { value: 'OY', label: 'OY' },
+            { value: 'UW1', label: 'UW1' },
+            { value: 'UW2', label: 'UW2' },
+            { value: 'OW', label: 'OW' },
+            { value: 'AW', label: 'AW' },
+            { value: 'EL', label: 'EL' },
+            { value: 'ER1', label: 'ER1' },
+            { value: 'ER2', label: 'ER2' },
+            { value: 'OR', label: 'OR' },
+            { value: 'AR', label: 'AR' },
+            { value: 'YR', label: 'YR' },
+            { value: 'XR', label: 'XR' },
+            { value: 'YY1', label: 'YY1' },
+            { value: 'YY2', label: 'YY2' }
+        ];
+
+        function createVowelDropdown(selectedValue, dropdownId) {
+            let optionsHtml = '';
+            vowelOptions.forEach(option => {
+                const selected = option.value === selectedValue ? 'selected' : '';
+                optionsHtml += `<option value="${option.value}" ${selected}>${option.label}</option>`;
+            });
+
+            return `<select class="phoneme-dropdown" id="${dropdownId}" onchange="handleVowelChange(this, '${dropdownId}')">${optionsHtml}</select>`;
+        }
+
+        function handleVowelChange(dropdown, dropdownId) {
+            const newValue = dropdown.value;
+            const phonemeIndex = parseInt(dropdownId.split('-')[1]);
+
+            // Update the currentPhonemes array
+            currentPhonemes[phonemeIndex] = newValue;
+
+            // Update the phoneme controls on the right
+            createPhonemeControls(currentPhonemes);
+
+            console.log(`Vowel changed to: ${newValue} at index ${phonemeIndex}`);
+        }
+
+        function appendSp0256Phonemes(outputTokens, mappedValue) {
+            const phonemes = Array.isArray(mappedValue) ? mappedValue : [mappedValue];
+            phonemes.forEach((phoneme) => {
+                if (!phoneme) {
+                    return;
+                }
+
+                if (vowelPhonemes.includes(phoneme)) {
+                    const dropdownId = `vowel-${currentPhonemes.length}`;
+                    outputTokens.push(createVowelDropdown(phoneme, dropdownId));
+                } else {
+                    outputTokens.push(`<span class="phoneme">${phoneme}</span>`);
+                }
+
+                currentPhonemes.push(phoneme);
+            });
+        }
+
+        const PITCH_CLOCK_MIN = 0;
+        const PITCH_CLOCK_MAX = 1023;
+        const PITCH_CLOCK_DEFAULT = 651;
+        const MIDI_VELOCITY_DEFAULT = 96; // Note On volume, 1–127
+
+        /** LTC6903 master clock control 0–1023 → 14-bit MIDI pitch bend (0–16383) on the wire. */
+        function pitchClockToPitchBend14(clock0to1023) {
+            const d = Math.max(PITCH_CLOCK_MIN, Math.min(PITCH_CLOCK_MAX, Math.round(Number(clock0to1023) || PITCH_CLOCK_DEFAULT)));
+            const bend14 = Math.round((d / PITCH_CLOCK_MAX) * 16383);
+            return Math.max(0, Math.min(16383, bend14));
+        }
+
+        function pitchClockToPitchBendBytes(clock0to1023) {
+            const b = pitchClockToPitchBend14(clock0to1023);
+            return [b & 0x7F, (b >> 7) & 0x7F];
+        }
+
+        function millisecondsToMidiTicks(milliseconds, bpm, ticksPerQuarterNote) {
+            const safeMilliseconds = Math.max(0, Math.round(Number(milliseconds) || 0));
+            return Math.max(0, Math.round((safeMilliseconds * bpm * ticksPerQuarterNote) / 60000));
+        }
+
+        let sliderTooltipElement = null;
+        let activeSliderTooltipContainer = null;
+
+        function getSliderTooltipElement() {
+            if (!sliderTooltipElement) {
+                sliderTooltipElement = document.createElement('div');
+                sliderTooltipElement.className = 'slider-tooltip';
+                document.body.appendChild(sliderTooltipElement);
+            }
+            return sliderTooltipElement;
+        }
+
+        function positionSliderTooltip(pageX, pageY) {
+            const tooltip = getSliderTooltipElement();
+            const offset = 14;
+            const tooltipWidth = tooltip.offsetWidth || 180;
+            const tooltipHeight = tooltip.offsetHeight || 32;
+            const maxLeft = Math.max(8, window.innerWidth - tooltipWidth - 8);
+            const maxTop = Math.max(8, window.innerHeight - tooltipHeight - 8);
+            tooltip.style.left = Math.min(maxLeft, pageX + offset) + 'px';
+            tooltip.style.top = Math.min(maxTop, pageY + offset) + 'px';
+        }
+
+        function showSliderTooltip(container, pageX, pageY) {
+            const tooltipText = container.dataset.tooltip;
+            if (!tooltipText) {
+                return;
+            }
+
+            const tooltip = getSliderTooltipElement();
+            activeSliderTooltipContainer = container;
+            tooltip.textContent = tooltipText;
+            tooltip.style.display = 'block';
+            positionSliderTooltip(pageX, pageY);
+        }
+
+        function hideSliderTooltip(container) {
+            if (activeSliderTooltipContainer !== container) {
+                return;
+            }
+
+            const tooltip = getSliderTooltipElement();
+            activeSliderTooltipContainer = null;
+            tooltip.style.display = 'none';
+        }
+
+        function attachSliderTooltip(container) {
+            if (container.dataset.tooltipAttached === '1') {
+                return;
+            }
+
+            container.dataset.tooltipAttached = '1';
+            container.addEventListener('mouseenter', function (event) {
+                showSliderTooltip(container, event.clientX, event.clientY);
+            });
+            container.addEventListener('mousemove', function (event) {
+                if (activeSliderTooltipContainer === container) {
+                    positionSliderTooltip(event.clientX, event.clientY);
+                }
+            });
+            container.addEventListener('mouseleave', function () {
+                hideSliderTooltip(container);
+            });
+            container.addEventListener('focusin', function () {
+                const rect = container.getBoundingClientRect();
+                showSliderTooltip(container, rect.left, rect.bottom);
+            });
+            container.addEventListener('focusout', function () {
+                hideSliderTooltip(container);
+            });
+        }
+
+        function setSliderTooltip(container, phoneme, index, label, valueText) {
+            const tooltip = `${index + 1}. ${phoneme} - ${label}: ${valueText}`;
+            container.dataset.tooltip = tooltip;
+            container.setAttribute('aria-label', tooltip);
+            container.querySelectorAll('canvas, input').forEach((sliderElement) => {
+                sliderElement.setAttribute('aria-label', tooltip);
+            });
+            attachSliderTooltip(container);
+
+            if (activeSliderTooltipContainer === container && sliderTooltipElement) {
+                sliderTooltipElement.textContent = tooltip;
+            }
+        }
+
+        function createPhonemeControls(phonemes) {
+            const controlsList = document.getElementById('phonemeControlsList');
+            controlsList.innerHTML = '';
+            phonemeSliders = [];
+            phonemeDurations = [];
+            phonemeVelocities = [];
+            phonemePitches = [];
+
+            console.log('Creating phoneme controls for:', phonemes);
+
+            if (phonemes.length === 0) {
+                controlsList.innerHTML = '<p style="text-align: center; color: #666;">No phonemes to control. Enter some text first.</p>';
+                return;
+            }
+
+            // Create table
+            const table = document.createElement('table');
+            table.className = 'phoneme-table';
+
+            // Create header
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = `
+                <th>Phoneme</th>
+                <th>Note Duration (ms)</th>
+                <th>Velocity</th>
+                <th>PitchBend (Pitch)</th>
+            `;
+            table.appendChild(headerRow);
+
+            // Create rows for each phoneme
+            phonemes.forEach((phoneme, index) => {
+                const row = document.createElement('tr');
+
+                // Column 1: Phoneme
+                const phonemeCell = document.createElement('td');
+                const phonemeLabel = document.createElement('div');
+                phonemeLabel.className = 'phoneme-label';
+
+                // Add vowel class if it's a vowel
+                if (vowelPhonemes.includes(phoneme)) {
+                    phonemeLabel.classList.add('vowel');
+                }
+
+                phonemeLabel.textContent = phoneme;
+                phonemeCell.appendChild(phonemeLabel);
+                row.appendChild(phonemeCell);
+
+                // Column 2: note duration in ms
+                const durationCell = document.createElement('td');
+                const durationContainer = document.createElement('div');
+                durationContainer.className = 'phoneme-slider-container';
+                durationContainer.id = `duration-slider-${index}`;
+
+                const durationDisplay = document.createElement('div');
+                durationDisplay.className = 'phoneme-display';
+                durationDisplay.id = `duration-${index}`;
+                durationDisplay.textContent = '100ms';
+
+                durationCell.appendChild(durationContainer);
+                durationCell.appendChild(durationDisplay);
+                row.appendChild(durationCell);
+
+                // Column 3: Velocity
+                const velocityCell = document.createElement('td');
+                const velocityContainer = document.createElement('div');
+                velocityContainer.className = 'phoneme-slider-container';
+                velocityContainer.id = `velocity-slider-${index}`;
+
+                const velocityDisplay = document.createElement('div');
+                velocityDisplay.className = 'phoneme-display';
+                velocityDisplay.id = `velocity-${index}`;
+                velocityDisplay.textContent = String(MIDI_VELOCITY_DEFAULT);
+
+                velocityCell.appendChild(velocityContainer);
+                velocityCell.appendChild(velocityDisplay);
+                row.appendChild(velocityCell);
+
+                // Column 4: Pitch
+                const pitchCell = document.createElement('td');
+                const pitchContainer = document.createElement('div');
+                pitchContainer.className = 'phoneme-slider-container';
+                pitchContainer.id = `pitch-slider-${index}`;
+
+                const pitchDisplay = document.createElement('div');
+                pitchDisplay.className = 'phoneme-display';
+                pitchDisplay.id = `pitch-${index}`;
+                pitchDisplay.textContent = String(PITCH_CLOCK_DEFAULT);
+
+                pitchCell.appendChild(pitchContainer);
+                pitchCell.appendChild(pitchDisplay);
+                row.appendChild(pitchCell);
+
+                table.appendChild(row);
+
+                const updateDurationTooltip = (value) => setSliderTooltip(durationContainer, phoneme, index, 'Note Duration', `${value}ms`);
+                const updateVelocityTooltip = (value) => setSliderTooltip(velocityContainer, phoneme, index, 'Velocity', String(value));
+                const updatePitchTooltip = (value) => setSliderTooltip(pitchContainer, phoneme, index, 'PitchBend (Pitch)', String(value));
+
+                // Create NexusUI slider
+                try {
+                    if (typeof Nexus !== 'undefined' && Nexus.Slider) {
+                        const durationSlider = new Nexus.Slider(`#duration-slider-${index}`, {
+                            'size': [120, 18],
+                            'mode': 'relative',
+                            'min': 50,
+                            'max': 1000,
+                            'step': 10,
+                            'value': 100
+                        });
+
+                        // Velocity slider
+                        const velocitySlider = new Nexus.Slider(`#velocity-slider-${index}`, {
+                            'size': [120, 18],
+                            'mode': 'relative',
+                            'min': 1,
+                            'max': 127,
+                            'step': 1,
+                            'value': MIDI_VELOCITY_DEFAULT
+                        });
+
+                        // PitchBend (Pitch) slider
+                        const pitchSlider = new Nexus.Slider(`#pitch-slider-${index}`, {
+                            'size': [120, 18],
+                            'mode': 'relative',
+                            'min': PITCH_CLOCK_MIN,
+                            'max': PITCH_CLOCK_MAX,
+                            'step': 1,
+                            'value': PITCH_CLOCK_DEFAULT
+                        });
+
+                        updateDurationTooltip(100);
+                        updateVelocityTooltip(MIDI_VELOCITY_DEFAULT);
+                        updatePitchTooltip(PITCH_CLOCK_DEFAULT);
+
+                        durationSlider.on('change', function (v) {
+                            const value = Math.round(v);
+                            durationDisplay.textContent = value + 'ms';
+                            phonemeDurations[index] = value;
+                            updateDurationTooltip(value);
+                        });
+
+                        // Velocity slider event
+                        velocitySlider.on('change', function (v) {
+                            const value = Math.round(v);
+                            velocityDisplay.textContent = value;
+                            phonemeVelocities[index] = value;
+                            updateVelocityTooltip(value);
+                        });
+
+                        // Pitch: stored as the LTC6903 master clock control value; readout is raw control only
+                        pitchSlider.on('change', function (v) {
+                            const pv = Math.max(PITCH_CLOCK_MIN, Math.min(PITCH_CLOCK_MAX, Math.round(v)));
+                            phonemePitches[index] = pv;
+                            pitchDisplay.textContent = String(pv);
+                            updatePitchTooltip(pv);
+                        });
+
+                        phonemeSliders.push(durationSlider, velocitySlider, pitchSlider);
+                    } else {
+                        throw new Error('NexusUI not loaded');
+                    }
+                } catch (error) {
+                    console.error('Error creating sliders:', error);
+                    // Fallback: create simple HTML range inputs
+
+                    const durationFallbackSlider = document.createElement('input');
+                    durationFallbackSlider.type = 'range';
+                    durationFallbackSlider.min = '50';
+                    durationFallbackSlider.max = '1000';
+                    durationFallbackSlider.step = '10';
+                    durationFallbackSlider.value = '100';
+                    durationFallbackSlider.style.width = '120px';
+                    durationContainer.appendChild(durationFallbackSlider);
+
+                    // Velocity slider
+                    const velocityFallbackSlider = document.createElement('input');
+                    velocityFallbackSlider.type = 'range';
+                    velocityFallbackSlider.min = '1';
+                    velocityFallbackSlider.max = '127';
+                    velocityFallbackSlider.step = '1';
+                    velocityFallbackSlider.value = String(MIDI_VELOCITY_DEFAULT);
+                    velocityFallbackSlider.style.width = '120px';
+                    velocityContainer.appendChild(velocityFallbackSlider);
+
+                    // PitchBend (Pitch) slider
+                    const pitchFallbackSlider = document.createElement('input');
+                    pitchFallbackSlider.type = 'range';
+                    pitchFallbackSlider.min = String(PITCH_CLOCK_MIN);
+                    pitchFallbackSlider.max = String(PITCH_CLOCK_MAX);
+                    pitchFallbackSlider.step = '1';
+                    pitchFallbackSlider.value = String(PITCH_CLOCK_DEFAULT);
+                    pitchFallbackSlider.style.width = '120px';
+                    pitchContainer.appendChild(pitchFallbackSlider);
+
+                    updateDurationTooltip(100);
+                    updateVelocityTooltip(MIDI_VELOCITY_DEFAULT);
+                    updatePitchTooltip(PITCH_CLOCK_DEFAULT);
+
+                    durationFallbackSlider.addEventListener('input', function (e) {
+                        const value = parseInt(e.target.value);
+                        durationDisplay.textContent = value + 'ms';
+                        phonemeDurations[index] = value;
+                        updateDurationTooltip(value);
+                    });
+
+                    // Velocity slider event
+                    velocityFallbackSlider.addEventListener('input', function (e) {
+                        const value = parseInt(e.target.value);
+                        velocityDisplay.textContent = value;
+                        phonemeVelocities[index] = value;
+                        updateVelocityTooltip(value);
+                    });
+
+                    pitchFallbackSlider.addEventListener('input', function (e) {
+                        const value = Math.max(PITCH_CLOCK_MIN, Math.min(PITCH_CLOCK_MAX, parseInt(e.target.value, 10) || PITCH_CLOCK_DEFAULT));
+                        phonemePitches[index] = value;
+                        pitchDisplay.textContent = String(value);
+                        updatePitchTooltip(value);
+                    });
+                }
+
+                // Store note duration, velocity, and pitch by position
+                phonemeDurations[index] = 100;
+                phonemeVelocities[index] = MIDI_VELOCITY_DEFAULT;
+                phonemePitches[index] = PITCH_CLOCK_DEFAULT;
+            });
+
+            controlsList.appendChild(table);
+        }
+
+        function resetAllSliders() {
+            // Reset stored values to defaults by position
+            currentPhonemes.forEach((phoneme, index) => {
+                phonemeDurations[index] = 100;
+                phonemeVelocities[index] = MIDI_VELOCITY_DEFAULT;
+                phonemePitches[index] = PITCH_CLOCK_DEFAULT;
+            });
+
+            // Recreate the phoneme controls with default values
+            createPhonemeControls(currentPhonemes);
+
+            console.log('All sliders reset to default values');
+        }
+
+        function sendMIDINotes() {
+            const sendBtn = document.getElementById('sendMidiBtn');
+
+            if (!selectedOutput) {
+                showStatus('Please connect to a MIDI device first.', 'error');
+                return;
+            }
+
+            if (currentPhonemes.length === 0) {
+                showStatus('No phonemes to send. Please enter some text first.', 'error');
+                return;
+            }
+
+            if (isSendingMidi) {
+                showStatus('MIDI send already in progress.', 'error');
+                return;
+            }
+
+            clearMidiSendTimeouts();
+            isSendingMidi = true;
+            sendBtn.disabled = true;
+            showStatus('Sending MIDI notes...', 'success');
+
+            let noteIndex = 0;
+
+            function finishMIDISend(message, type = 'success') {
+                clearMidiSendTimeouts();
+                isSendingMidi = false;
+                sendBtn.disabled = false;
+                showStatus(message, type);
+            }
+
+            function sendNextNote() {
+                if (noteIndex >= currentPhonemes.length) {
+                    finishMIDISend(`Sent ${currentPhonemes.length} MIDI notes successfully!`);
+                    return;
+                }
+
+                const phoneme = currentPhonemes[noteIndex];
+                const midiEvent = getSp0256MIDIEvent(phoneme);
+
+                if (midiEvent) {
+                    const delayToNextMs = phonemeDurations[noteIndex] ?? 100;
+                    const velocity = phonemeVelocities[noteIndex] ?? MIDI_VELOCITY_DEFAULT;
+                    const pitch = phonemePitches[noteIndex] ?? PITCH_CLOCK_DEFAULT;
+
+                    // Same scheduling for every phoneme (including the first): never send from the click stack only.
+                    // Order: pitch bend → Note On; then release the note
+                    // at the next onset boundary so the final phoneme does not hang indefinitely.
+                    const [bendLsb, bendMsb] = pitchClockToPitchBendBytes(pitch);
+                    scheduleMidiSend(() => {
+                        selectedOutput.send([statusByte(0xE0, midiEvent.channel), bendLsb, bendMsb]);
+                        selectedOutput.send([statusByte(0x90, midiEvent.channel), midiEvent.note, velocity]);
+                        const waitBeforeNextOnset = Math.max(0, delayToNextMs - 10);
+                        scheduleMidiSend(() => {
+                            selectedOutput.send([statusByte(0x80, midiEvent.channel), midiEvent.note, 0]);
+                            noteIndex++;
+                            scheduleMidiSend(sendNextNote, 0);
+                        }, waitBeforeNextOnset);
+                    }, 10);
+                } else {
+                    noteIndex++;
+                    scheduleMidiSend(sendNextNote, 50);
+                }
+            }
+
+            scheduleMidiSend(sendNextNote, 0);
+        }
+
+        function downloadMIDI() {
+            if (currentPhonemes.length === 0) {
+                showStatus('No phonemes to export. Enter some text first.', 'error');
+                return;
+            }
+
+            showStatus('Generating MIDI file...', 'success');
+
+            const ticksPerQuarterNote = 480;
+            const bpm = 120;
+            const microsecondsPerQuarterNote = Math.round(60000000 / bpm);
+
+            const midiData = [];
+
+            midiData.push(0x4D, 0x54, 0x68, 0x64);
+            midiData.push(0x00, 0x00, 0x00, 0x06);
+            midiData.push(0x00, 0x00);
+            midiData.push(0x00, 0x01);
+            midiData.push(0x01, 0xE0);
+
+            midiData.push(0x4D, 0x54, 0x72, 0x6B);
+            const trackLengthPosition = midiData.length;
+            midiData.push(0x00, 0x00, 0x00, 0x00);
+
+            const trackEvents = [];
+
+            trackEvents.push(0x00);
+            trackEvents.push(0xFF, 0x51, 0x03);
+            trackEvents.push((microsecondsPerQuarterNote >> 16) & 0xFF);
+            trackEvents.push((microsecondsPerQuarterNote >> 8) & 0xFF);
+            trackEvents.push(microsecondsPerQuarterNote & 0xFF);
+
+            // 1 tick after tempo meta before first channel event (some sequencers merge delta-0 meta + bend badly).
+            let deltaBeforePhoneme = 1;
+
+            currentPhonemes.forEach((phoneme, index) => {
+                const midiEvent = getSp0256MIDIEvent(phoneme);
+                if (!midiEvent) {
+                    return;
+                }
+
+                const delayToNextMs = phonemeDurations[index] ?? 100;
+                const velocity = phonemeVelocities[index] ?? MIDI_VELOCITY_DEFAULT;
+                const pitch = phonemePitches[index] ?? PITCH_CLOCK_DEFAULT;
+                const [bendLsb, bendMsb] = pitchClockToPitchBendBytes(pitch);
+
+                const delayTicks = millisecondsToMidiTicks(delayToNextMs, bpm, ticksPerQuarterNote);
+
+                trackEvents.push(...encodeVariableLength(deltaBeforePhoneme));
+                trackEvents.push(statusByte(0xE0, midiEvent.channel), bendLsb, bendMsb); // Pitch bend before phoneme
+                trackEvents.push(0x00);
+                trackEvents.push(statusByte(0x90, midiEvent.channel), midiEvent.note, velocity);
+                // The SP0256 bridge only needs Note On triggers. Omitting Note Off avoids
+                // trailing PA1 on firmware that maps Note Off to phoneme 0.
+                deltaBeforePhoneme = Math.max(0, delayTicks);
+            });
+
+            // EOP (ID 255) would exceed MIDI note range — omit it.
+
+            trackEvents.push(...encodeVariableLength(deltaBeforePhoneme));
+            trackEvents.push(0xFF, 0x2F, 0x00);
+
+            const trackLength = trackEvents.length;
+            midiData[trackLengthPosition] = (trackLength >> 24) & 0xFF;
+            midiData[trackLengthPosition + 1] = (trackLength >> 16) & 0xFF;
+            midiData[trackLengthPosition + 2] = (trackLength >> 8) & 0xFF;
+            midiData[trackLengthPosition + 3] = trackLength & 0xFF;
+
+            midiData.push(...trackEvents);
+
+            const midiArray = new Uint8Array(midiData);
+            const blob = new Blob([midiArray], { type: 'audio/midi' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Spo256.mid';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showStatus('MIDI trigger file downloaded successfully!', 'success');
+        }
+
+        function encodeVariableLength(value) {
+            const result = [];
+            if (value === 0) {
+                result.push(0);
+            } else {
+                while (value > 0) {
+                    result.unshift(value & 0x7F);
+                    value >>= 7;
+                }
+                for (let i = 0; i < result.length - 1; i++) {
+                    result[i] |= 0x80;
+                }
+            }
+            return result;
+        }
+
+        function showMIDIDialog() {
+            const dialog = document.getElementById('midiDialog');
+            const deviceList = document.getElementById('deviceList');
+
+            dialog.style.display = 'flex';
+
+            // Request MIDI access and populate device list
+            if (navigator.requestMIDIAccess) {
+                navigator.requestMIDIAccess().then(function (access) {
+                    midiAccess = access;
+                    availableOutputs = Array.from(access.outputs.values());
+
+                    if (availableOutputs.length === 0) {
+                        deviceList.innerHTML = '<div class="device-item">No MIDI output devices found. Please connect a MIDI device and refresh.</div>';
+                        return;
+                    }
+
+                    // Populate device list
+                    deviceList.innerHTML = '';
+                    availableOutputs.forEach((output, index) => {
+                        const deviceItem = document.createElement('div');
+                        deviceItem.className = 'device-item';
+                        deviceItem.textContent = output.name || `MIDI Device ${index + 1}`;
+                        deviceItem.onclick = () => selectDevice(index);
+                        deviceList.appendChild(deviceItem);
+                    });
+
+                }).catch(function (err) {
+                    deviceList.innerHTML = `<div class="device-item">Error accessing MIDI: ${err.message}</div>`;
+                });
+            } else {
+                deviceList.innerHTML = '<div class="device-item">MIDI not supported in this browser.</div>';
+            }
+        }
+
+        function selectDevice(index) {
+            // Remove previous selection
+            document.querySelectorAll('.device-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            // Select new device
+            document.querySelectorAll('.device-item')[index].classList.add('selected');
+
+            // Enable connect button
+            document.getElementById('connectBtn').disabled = false;
+        }
+
+        function connectToDevice() {
+            const selectedIndex = Array.from(document.querySelectorAll('.device-item')).findIndex(item =>
+                item.classList.contains('selected')
+            );
+
+            if (selectedIndex === -1) {
+                showStatus('Please select a MIDI device first.', 'error');
+                return;
+            }
+
+            selectedOutput = availableOutputs[selectedIndex];
+
+            // Update UI
+            document.getElementById('connectMidiBtn').textContent = '✅ Connected';
+            document.getElementById('connectMidiBtn').disabled = true;
+            document.getElementById('sendMidiBtn').disabled = false;
+
+            // Show connection status
+            const connectionStatus = document.getElementById('midiConnectionStatus');
+            connectionStatus.textContent = `Connected to: ${selectedOutput.name || 'MIDI Device'}`;
+            connectionStatus.className = 'status success';
+            connectionStatus.style.display = 'block';
+
+            closeMIDIDialog();
+        }
+
+        function closeMIDIDialog() {
+            document.getElementById('midiDialog').style.display = 'none';
+        }
+
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('midiStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function convertToPhonemes() {
+            const textInput = document.getElementById('textInput');
+            const ipaOutput = document.getElementById('ipaOutput');
+            const sp0256Output = document.getElementById('sp0256PhonemesOutput');
+
+            const text = textInput.value.trim();
+            if (!text) {
+                ipaOutput.textContent = '';
+                sp0256Output.innerHTML = '';
+                currentPhonemes = [];
+                return;
+            }
+
+            // Convert to IPA
+            const ipa = textToIPA(text);
+            ipaOutput.textContent = ipa;
+
+            let sp0256HtmlTokens = [];
+            currentPhonemes = [];
+
+            const words = text.toLowerCase().split(/\s+/);
+
+            words.forEach((word) => {
+                const wordIPA = textToIPA(word);
+
+                for (let i = 0; i < wordIPA.length; i++) {
+                    const char = wordIPA[i];
+
+                    if (char === 'ˈ' || char === 'ˌ' || char === 'ː') {
+                        continue;
+                    }
+
+                    let found = false;
+                    for (let length = 3; length >= 1; length--) {
+                        if (i + length <= wordIPA.length) {
+                            const substr = wordIPA.substring(i, i + length);
+                            if (hasSp0256Mapping(substr)) {
+                                appendSp0256Phonemes(sp0256HtmlTokens, ipaToSp0256[substr]);
+                                i += length - 1;
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!found && hasSp0256Mapping(char)) {
+                        appendSp0256Phonemes(sp0256HtmlTokens, ipaToSp0256[char]);
+                    }
+                }
+            });
+
+            sp0256Output.innerHTML = sp0256HtmlTokens.join(' ');
+
+            createPhonemeControls(currentPhonemes);
+        }
+
+        // Convert on input
+        document.getElementById('textInput').addEventListener('input', convertToPhonemes);
+
+        document.getElementById('howItWorksBtn').addEventListener('click', function () {
+            const panel = document.getElementById('howItWorksPanel');
+            const isHidden = panel.hasAttribute('hidden');
+
+            panel.toggleAttribute('hidden', !isHidden);
+            this.setAttribute('aria-expanded', String(isHidden));
+        });
+
+        // Add keyboard support for spacebar to send MIDI
+        document.addEventListener('keydown', function (event) {
+            // Check if spacebar is pressed and no input field is focused
+            if (event.code === 'Space' && document.activeElement !== document.getElementById('textInput')) {
+                event.preventDefault(); // Prevent page scroll
+                if (event.repeat) {
+                    return;
+                }
+                sendMIDINotes();
+            }
+        });
+
+        // Convert on page load
+        window.onload = function () {
+            convertToPhonemes();
+        };
+    </script>
+</body>
+
+</html>
